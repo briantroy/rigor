@@ -83,20 +83,20 @@ class BotoS3Client(RigorS3Client):
 
 	def __init__(self, config, bucket, credentials=None):
 		super(BotoS3Client, self).__init__(config, bucket, credentials)
-		connection_args = list()
-		if credentials:
-			connection_args.append(config.get(credentials, 'aws_access_key_id'))
-			connection_args.append(config.get(credentials, 'aws_secret_access_key'))
 		if 'boto3' in sys.modules:
 			if credentials:
 				session = boto3.session.Session(aws_access_key_id=config.get(credentials, 'aws_access_key_id'),
-													  aws_secret_access_key=config.get(credentials, 'aws_secret_access_key'))
+												aws_secret_access_key=config.get(credentials, 'aws_secret_access_key'))
 				self._conn = session.resource('s3')
 			else:
 				self._conn = boto3.resource('s3')
 
 			self.bucket = self._conn.Bucket(bucket)
 		else:
+			connection_args = list()
+			if credentials:
+				connection_args.append(config.get(credentials, 'aws_access_key_id'))
+				connection_args.append(config.get(credentials, 'aws_secret_access_key'))
 			self._conn = S3Connection(*connection_args)
 			self.bucket = self._conn.get_bucket(bucket)
 
