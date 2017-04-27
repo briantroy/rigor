@@ -6,11 +6,9 @@ import sys
 try:
 	import boto3
 except ImportError:
-	try:
-		from boto.s3.connection import S3Connection
-		from boto.s3.key import Key
-	except ImportError:
-		print("ignore")
+	from boto.s3.connection import S3Connection
+	from boto.s3.key import Key
+
 
 
 import botocore
@@ -24,7 +22,6 @@ class RigorS3Client(object):
 	:type config: :py:class:`~rigor.config.RigorConfiguration`
 	:param str bucket: S3 bucket containing data
 	:param str credentials: name of credentials section
-	:param str session: the s3 session if one exists.
 	"""
 	__metaclass__ = ABCMeta
 
@@ -58,7 +55,7 @@ class RigorS3Client(object):
 
 	@abstractmethod
 	def delete(self, key):
-		"""sudo 
+		"""
 		Removes data at the given key from S3
 
 		:param str key: S3 key for the object to delete
