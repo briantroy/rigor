@@ -4,8 +4,9 @@ from abc import ABCMeta, abstractmethod
 from io import BytesIO
 import sys
 try:
-	import boto3
-	import botocore
+ 	from boto3 import session
+	from boto3 import resource
+	from botocore.exceptions import ClientError
 except ImportError:
 	from boto.s3.connection import S3Connection
 	from boto.s3.key import Key
@@ -80,11 +81,11 @@ class BotoS3Client(RigorS3Client):
 		super(BotoS3Client, self).__init__(config, bucket, credentials)
 		if 'boto3' in sys.modules:
 			if credentials:
-				session = boto3.session.Session(aws_access_key_id=config.get(credentials, 'aws_access_key_id'),
+				boto3session = session.Session(aws_access_key_id=config.get(credentials, 'aws_access_key_id'),
 												aws_secret_access_key=config.get(credentials, 'aws_secret_access_key'))
-				self._conn = session.resource('s3')
+				self._conn = boto3session.resource('s3')
 			else:
-				self._conn = boto3.resource('s3')
+				self._conn = resource('s3')
 
 			self.bucket = self._conn.Bucket(bucket)
 		else:
@@ -155,7 +156,7 @@ class BotoS3Client(RigorS3Client):
 			else:
 				self.bucket.download_file(key, local_file)
 				return True
-		except botocore.exceptions.ClientError as e:
+		except ClientError as e:
 			return None
 
 		return s3_obj
