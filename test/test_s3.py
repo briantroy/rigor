@@ -41,6 +41,9 @@ def test_get_open_file(client):
 			value = contents.read()
 			assert value == str(index)
 
+def test_get_boto_version(client):
+	assert client.boto_version().startswith('boto')
+
 def test_get_missing(client):
 	contents = client.get('xthanteohntahoeaoedhaod')
 	assert contents is None

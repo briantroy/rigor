@@ -80,6 +80,7 @@ class BotoS3Client(RigorS3Client):
 	def __init__(self, config, bucket, credentials=None):
 		super(BotoS3Client, self).__init__(config, bucket, credentials)
 		if 'boto3' in sys.modules:
+			self._boto_version = 'boto3'
 			if credentials:
 				boto3session = session.Session(aws_access_key_id=config.get(credentials, 'aws_access_key_id'),
 												aws_secret_access_key=config.get(credentials, 'aws_secret_access_key'))
@@ -89,6 +90,7 @@ class BotoS3Client(RigorS3Client):
 
 			self.bucket = self._conn.Bucket(bucket)
 		else:
+			self._boto_version = 'boto'
 			connection_args = list()
 			if credentials:
 				connection_args.append(config.get(credentials, 'aws_access_key_id'))
@@ -98,7 +100,7 @@ class BotoS3Client(RigorS3Client):
 
 	def get(self, key, local_file=None):
 		""" See :py:meth:`RigorS3Client.get` """
-		if 'boto3' in sys.modules:
+		if self._boto_version == 'boto3':
 			return self.__boto3_get__(key, local_file)
 
 		fetched_key = self.bucket.get_key(key)
@@ -114,7 +116,7 @@ class BotoS3Client(RigorS3Client):
 
 	def put(self, key, data):
 		""" See :py:meth:`RigorS3Client.put` """
-		if 'boto3' in sys.modules:
+		if self._boto_version == 'boto3':
 			return self.__boto3_put__(key, data)
 
 		remote_key = Key(self.bucket)
@@ -126,7 +128,7 @@ class BotoS3Client(RigorS3Client):
 
 	def delete(self, key):
 		""" See :py:meth:`RigorS3Client.delete` """
-		if 'boto3' in sys.modules:
+		if self._boto_version == 'boto3':
 			return self.__boto3_delete__(key)
 
 		remote_key = Key(self.bucket)
@@ -135,12 +137,16 @@ class BotoS3Client(RigorS3Client):
 
 	def list(self, prefix=None):
 		""" See :py:meth:`RigorS3Client.list` """
-		if 'boto3' in sys.modules:
+		if self._boto_version == 'boto3':
 			return self.__boto3_list__(prefix)
 
 		if prefix is None:
 			prefix = ""
 		return self.bucket.list(prefix=prefix)
+
+	def boto_version(self):
+		return self._boto_version
+
 
 	def __boto3_get__(self, key, local_file=None):
 		""" See :py:meth:`RigorS3Client.get` 
