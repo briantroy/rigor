@@ -5,13 +5,11 @@ from io import BytesIO
 import sys
 try:
 	import boto3
+	import botocore
 except ImportError:
 	from boto.s3.connection import S3Connection
 	from boto.s3.key import Key
 
-
-
-import botocore
 
 
 class RigorS3Client(object):
@@ -148,6 +146,8 @@ class BotoS3Client(RigorS3Client):
 			This implementation is speicfic to Boto3
 		"""
 		s3_obj = BytesIO()
+		if key[:1] == '/':
+			key = key.lstrip('/')
 		try:
 			if local_file is None:
 				self.bucket.download_fileobj(key, s3_obj)
@@ -164,6 +164,8 @@ class BotoS3Client(RigorS3Client):
 		""" See :py:meth:`RigorS3Client.put` 
 			This implementation is specific to Boto3
 		"""
+		if key[:1] == '/':
+			key = key.lstrip('/')
 		if hasattr(data, 'read'):
 			self.bucket.upload_fileobj(data, key)
 		else:
